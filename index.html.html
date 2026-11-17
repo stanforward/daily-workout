@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>每日運動紀錄｜安全肌力與核心訓練</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f4f7f6;
+      color: #1e293b;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+    .set-btn {
+      transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .set-btn:active {
+      transform: scale(0.97);
+    }
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-24 md:pb-12">
+  <!-- Top App Bar -->
+  <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-9 h-9 rounded-xl bg-teal-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <h1 class="text-base sm:text-lg font-bold text-slate-900 truncate">每日運動紀錄</h1>
+          <p class="text-xs text-slate-500 hidden sm:block">不憋氣 · 護關節 · 穩定累積</p>
+        </div>
+      </div>
+
+      <!-- View Tabs -->
+      <nav class="flex items-center bg-slate-100 p-1 rounded-xl shrink-0" aria-label="主導覽">
+        <button id="tab-today" type="button" class="px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all bg-white text-teal-700 shadow-sm">
+          今日訓練
+        </button>
+        <button id="tab-history" type="button" class="px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all text-slate-600 hover:text-slate-900">
+          歷史紀錄
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 pt-5 space-y-5">
+    <!-- ==================== TODAY VIEW ==================== -->
+    <section id="view-today" class="space-y-5">
+      <!-- Date Navigation & Daily Progress Summary -->
+      <div class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <button id="btn-prev-day" type="button" class="w-9 h-9 rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center justify-center text-slate-600 transition-colors" title="前一天" aria-label="前一天">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+            </button>
+            <div class="relative">
+              <input id="date-picker" type="date" class="px-3 py-1.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-800 bg-slate-50/70 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 cursor-pointer" />
+            </div>
+            <button id="btn-next-day" type="button" class="w-9 h-9 rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center justify-center text-slate-600 transition-colors" title="後一天" aria-label="後一天">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+            </button>
+            <button id="btn-go-today" type="button" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-teal-50 text-teal-700 hover:bg-teal-100 transition-colors">
+              今天
+            </button>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div class="text-right">
+              <div class="text-xs text-slate-500">當日完成組數</div>
+              <div class="text-lg font-bold text-slate-900 tabular-nums">
+                <span id="summary-sets-done">0</span>
+                <span class="text-sm font-medium text-slate-400">/ <span id="summary-sets-target">9</span> 基本組</span>
+              </div>
+            </div>
+            <div id="daily-status-badge" class="px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
+              尚未開始
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="mt-4">
+          <div class="flex items-center justify-between text-xs text-slate-500 mb-1.5">
+            <span>基本目標進度（3 項動作各 3 組起）</span>
+            <span id="summary-progress-pct" class="font-semibold text-teal-700 tabular-nums">0%</span>
+          </div>
+          <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+            <div id="summary-progress-bar" class="h-full bg-teal-500 rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Quick Stat Pills -->
+        <div class="grid grid-cols-3 gap-2.5 mt-4 pt-4 border-t border-slate-100">
+          <div class="bg-slate-50 rounded-xl p-2.5 text-center">
+            <div class="text-[11px] text-slate-500 font-medium">伏地挺身</div>
+            <div class="text-base font-bold text-slate-800 tabular-nums mt-0.5"><span id="stat-pushup-reps">0</span> <span class="text-xs font-normal text-slate-400">下</span></div>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-2.5 text-center">
+            <div class="text-[11px] text-slate-500 font-medium">深蹲</div>
+            <div class="text-base font-bold text-slate-800 tabular-nums mt-0.5"><span id="stat-squat-reps">0</span> <span class="text-xs font-normal text-slate-400">下</span></div>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-2.5 text-center">
+            <div class="text-[11px] text-slate-500 font-medium">死蟲式</div>
+            <div class="text-base font-bold text-slate-800 tabular-nums mt-0.5"><span id="stat-deadbug-reps">0</span> <span class="text-xs font-normal text-slate-400">次</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rest & Breathing Timer Bar -->
+      <div class="bg-gradient-to-r from-teal-700 to-teal-600 text-white rounded-2xl p-4 shadow-sm flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <div class="text-xs text-teal-100 font-medium">組間休息計時器 · 保持順暢呼吸勿憋氣</div>
+            <div id="timer-display" class="text-2xl font-bold tabular-nums tracking-tight">01:00</div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="flex items-center bg-white/10 rounded-xl p-0.5 text-xs font-semibold">
+            <button type="button" data-timer-sec="45" class="timer-preset px-2.5 py-1.5 rounded-lg hover:bg-white/15 transition-colors">45秒</button>
+            <button type="button" data-timer-sec="60" class="timer-preset px-2.5 py-1.5 rounded-lg bg-white text-teal-800 transition-colors">60秒</button>
+            <button type="button" data-timer-sec="90" class="timer-preset px-2.5 py-1.5 rounded-lg hover:bg-white/15 transition-colors">90秒</button>
+          </div>
+          <button id="btn-timer-toggle" type="button" class="px-3.5 py-2 rounded-xl bg-white text-teal-800 hover:bg-teal-50 text-xs font-bold shadow-sm transition-colors">
+            開始休息
+          </button>
+          <button id="btn-timer-reset" type="button" class="px-2.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-semibold transition-colors">
+            重設
+          </button>
+          <button id="btn-sound-toggle" type="button" class="w-8 h-8 rounded-xl bg-white/15 hover:bg-white/25 flex items-center justify-center transition-colors" title="提示音效開關" aria-label="提示音效開關">
+            <svg id="icon-sound-on" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" /></svg>
+            <svg id="icon-sound-off" class="w-4 h-4 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 9.75L19.5 12m0 0l2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6l4.72-4.72a.75.75 0 011.28.531V19.94a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.506-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.757 3.63 8.25 4.51 8.25H6.75z" /></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Exercise Cards Container -->
+      <div id="exercise-cards" class="space-y-4"></div>
+
+      <!-- Daily Body Condition & Notes -->
+      <div class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-sm space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+            <svg class="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+            今日身體感受與備註
+          </h2>
+          <span id="save-indicator" class="text-xs text-teal-600 font-medium opacity-0 transition-opacity">已自動儲存</span>
+        </div>
+
+        <div id="feeling-tags" class="flex flex-wrap gap-2"></div>
+
+        <div>
+          <textarea id="daily-note" rows="2" placeholder="記錄今天的呼吸節奏、髖關節或下背感受、血壓狀況等..." class="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 resize-none"></textarea>
+        </div>
+
+        <div class="flex items-center justify-between pt-1">
+          <span class="text-xs text-slate-400">所有紀錄僅儲存在您的瀏覽器本機中</span>
+          <button id="btn-clear-day" type="button" class="text-xs font-medium text-rose-500 hover:text-rose-700 transition-colors">
+            清除本日紀錄
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== HISTORY VIEW ==================== -->
+    <section id="view-history" class="hidden space-y-5">
+      <!-- KPI Cards -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm">
+          <div class="text-xs text-slate-500 font-medium">目前連續天數</div>
+          <div class="text-2xl font-bold text-teal-700 tabular-nums mt-1"><span id="kpi-streak">0</span> <span class="text-xs font-normal text-slate-500">天</span></div>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm">
+          <div class="text-xs text-slate-500 font-medium">累計訓練天數</div>
+          <div class="text-2xl font-bold text-slate-900 tabular-nums mt-1"><span id="kpi-total-days">0</span> <span class="text-xs font-normal text-slate-500">天</span></div>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm">
+          <div class="text-xs text-slate-500 font-medium">近 7 日總次數</div>
+          <div class="text-2xl font-bold text-slate-900 tabular-nums mt-1"><span id="kpi-week-reps">0</span> <span class="text-xs font-normal text-slate-500">下/次</span></div>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm">
+          <div class="text-xs text-slate-500 font-medium">近 7 日達標率</div>
+          <div class="text-2xl font-bold text-emerald-600 tabular-nums mt-1"><span id="kpi-week-rate">0</span><span class="text-xs font-normal text-slate-500">%</span></div>
+        </div>
+      </div>
+
+      <!-- Chart Card -->
+      <div class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <div>
+            <h2 class="text-sm font-bold text-slate-800">近期訓練量趨勢</h2>
+            <p class="text-xs text-slate-500">每日各項動作完成總次數</p>
+          </div>
+          <div class="flex items-center bg-slate-100 p-1 rounded-xl text-xs font-semibold">
+            <button type="button" data-range="7" class="chart-range-btn px-3 py-1 rounded-lg bg-white text-teal-700 shadow-sm">近 7 天</button>
+            <button type="button" data-range="14" class="chart-range-btn px-3 py-1 rounded-lg text-slate-600 hover:text-slate-900">近 14 天</button>
+          </div>
+        </div>
+        <div class="relative h-72">
+          <canvas id="history-chart"></canvas>
+        </div>
+      </div>
+
+      <!-- Backup & Restore -->
+      <div class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-sm flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-sm font-bold text-slate-800">資料備份與還原</h2>
+          <p class="text-xs text-slate-500">可將紀錄匯出為 JSON 檔案保存，或從備份檔匯入</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btn-export" type="button" class="px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-700 transition-colors">
+            匯出 JSON
+          </button>
+          <label class="px-3.5 py-2 rounded-xl bg-teal-50 hover:bg-teal-100 text-xs font-semibold text-teal-700 cursor-pointer transition-colors">
+            匯入備份
+            <input id="input-import" type="file" accept=".json,application/json" class="hidden" />
+          </label>
+        </div>
+      </div>
+
+      <!-- History List -->
+      <div class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-sm">
+        <h2 class="text-sm font-bold text-slate-800 mb-3">歷史訓練明細</h2>
+        <div id="history-list" class="divide-y divide-slate-100"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- In-page Confirmation Modal -->
+  <div id="confirm-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-xl border border-slate-100 space-y-4">
+      <h3 id="modal-title" class="text-base font-bold text-slate-900">確認操作</h3>
+      <p id="modal-desc" class="text-sm text-slate-600"></p>
+      <div class="flex items-center justify-end gap-2 pt-1">
+        <button id="modal-cancel" type="button" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors">取消</button>
+        <button id="modal-confirm" type="button" class="px-4 py-2 rounded-xl text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white transition-colors">確定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-200 bg-slate-900 text-white text-xs font-medium px-4 py-2.5 rounded-full shadow-lg"></div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const STORAGE_KEY = 'daily_safe_workout_logs_v1';
+
+      const EXERCISES = [
+        {
+          id: 'pushups',
+          name: '伏地挺身',
+          unit: '下',
+          defaultReps: 10,
+          minSets: 3,
+          maxSets: 4,
+          targetSummary: '10 下 × 3～4 組（總計 30–40 下）',
+          accentBg: 'bg-teal-50',
+          accentText: 'text-teal-700',
+          accentBorder: 'border-teal-200',
+          btnDoneClass: 'bg-teal-600 text-white border-teal-600 shadow-sm',
+          hasVariant: true,
+          variants: [
+            { id: 'standard', label: '標準姿' },
+            { id: 'kneeling', label: '跪姿' }
+          ],
+          tipTitle: '呼吸與關節保護提醒',
+          tipBody: '因為你有 15 下的基礎，但為了避免高血壓憋氣或對肩膀、手肘造成壓力，建議每組做 10 下就好，保持輕鬆、呼吸順暢（下放吸氣、推起吐氣）。如果髖關節或軀幹覺得核心不穩，也可以改為「跪姿伏地挺身」。'
+        },
+        {
+          id: 'squats',
+          name: '深蹲',
+          unit: '下',
+          defaultReps: 12,
+          minSets: 3,
+          maxSets: 4,
+          targetSummary: '12 下 × 3～4 組（總計 36–48 下）',
+          accentBg: 'bg-sky-50',
+          accentText: 'text-sky-700',
+          accentBorder: 'border-sky-200',
+          btnDoneClass: 'bg-sky-600 text-white border-sky-600 shadow-sm',
+          hasVariant: false,
+          tipTitle: '髖關節與脊椎保護提醒',
+          tipBody: '考量到髖關節較緊繃且有僵直性脊椎炎，下蹲時不需要蹲太深（大腿大約與地面呈 30 到 45 度即可，不一定要蹲到大腿平行地面），並且雙腳站距可以比肩膀稍寬一些，腳尖微外八，保護髖關節與下背。'
+        },
+        {
+          id: 'deadbug',
+          name: '核心訓練（死蟲式 Deadbug）',
+          unit: '次',
+          defaultReps: 10,
+          minSets: 3,
+          maxSets: 3,
+          targetSummary: '10 次（左右交替算 1 次）× 3 組',
+          accentBg: 'bg-amber-50',
+          accentText: 'text-amber-700',
+          accentBorder: 'border-amber-200',
+          btnDoneClass: 'bg-amber-600 text-white border-amber-600 shadow-sm',
+          hasVariant: false,
+          tipTitle: '為什麼選死蟲式？',
+          tipBody: '傳統的仰臥起坐或棒式容易讓僵直性脊椎炎患者的下背或腹部過度緊繃。死蟲式能非常安全地訓練深層核心（腹橫肌），同時完全平躺在地面，不會對脊椎和高血壓造成負擔。下背全程輕貼地面、動作放慢配合呼氣。'
+        }
+      ];
+
+      const FEELING_TAGS = [
+        '呼吸順暢',
+        '狀態輕鬆',
+        '髖關節微緊',
+        '下背舒適',
+        '下背微痠',
+        '改用跪姿'
+      ];
+
+      // In-memory fallback if localStorage is blocked
+      let memoryStore = {};
+      let currentView = 'today';
+      let selectedDate = getTodayStr();
+      let chartRange = 7;
+      let chartInstance = null;
+      let openTips = { pushups: false, squats: false, deadbug: false };
+
+      // Timer state
+      let timerDuration = 60;
+      let timerRemaining = 60;
+      let timerInterval = null;
+      let timerRunning = false;
+      let soundEnabled = true;
+
+      // Modal callback
+      let modalConfirmCallback = null;
+
+      function getTodayStr() {
+        const d = new Date();
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      }
+
+      function addDays(dateStr, delta) {
+        const [y, m, d] = dateStr.split('-').map(Number);
+        const dt = new Date(y, m - 1, d);
+        dt.setDate(dt.getDate() + delta);
+        const ny = dt.getFullYear();
+        const nm = String(dt.getMonth() + 1).padStart(2, '0');
+        const nd = String(dt.getDate()).padStart(2, '0');
+        return `${ny}-${nm}-${nd}`;
+      }
+
+      function loadAllLogs() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && typeof parsed === 'object') {
+              memoryStore = parsed;
+              return parsed;
+            }
+          }
+        } catch (e) {
+          // Fallback to memoryStore
+        }
+        return memoryStore;
+      }
+
+      function saveAllLogs(logs) {
+        memoryStore = logs;
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+        } catch (e) {
+          // Ignore storage quota/sandbox error, keep in memory
+        }
+        flashSavedIndicator();
+      }
+
+      function createEmptyDayRecord() {
+        const exercises = {};
+        EXERCISES.forEach(ex => {
+          const sets = [];
+          for (let i = 0; i < ex.maxSets; i++) {
+            sets.push({
+              done: false,
+              reps: ex.defaultReps,
+              optional: i >= ex.minSets
+            });
+          }
+          exercises[ex.id] = {
+            sets,
+            variant: ex.hasVariant ? 'standard' : null
+          };
+        });
+        return {
+          exercises,
+          tags: [],
+          note: '',
+          updatedAt: null
+        };
+      }
+
+      function getDayRecord(dateStr) {
+        const logs = loadAllLogs();
+        if (logs[dateStr]) {
+          // Normalize in case of older schema
+          const rec = logs[dateStr];
+          const base = createEmptyDayRecord();
+          EXERCISES.forEach(ex => {
+            if (rec.exercises && rec.exercises[ex.id]) {
+              const savedEx = rec.exercises[ex.id];
+              base.exercises[ex.id].variant = savedEx.variant || base.exercises[ex.id].variant;
+              if (Array.isArray(savedEx.sets)) {
+                base.exercises[ex.id].sets = base.exercises[ex.id].sets.map((s, idx) => {
+                  const old = savedEx.sets[idx];
+                  return old ? {
+                    done: Boolean(old.done),
+                    reps: Number.isFinite(Number(old.reps)) ? Math.max(0, Number(old.reps)) : s.reps,
+                    optional: s.optional
+                  } : s;
+                });
+              }
+            }
+          });
+          base.tags = Array.isArray(rec.tags) ? rec.tags : [];
+          base.note = typeof rec.note === 'string' ? rec.note : '';
+          base.updatedAt = rec.updatedAt || null;
+          return base;
+        }
+        return createEmptyDayRecord();
+      }
+
+      function updateDayRecord(dateStr, updater) {
+        const logs = loadAllLogs();
+        const current = getDayRecord(dateStr);
+        updater(current);
+        current.updatedAt = new Date().toISOString();
+
+        // Check if completely empty (no sets done, no tags, no note)
+        const anyDone = EXERCISES.some(ex => current.exercises[ex.id].sets.some(s => s.done));
+        if (!anyDone && current.tags.length === 0 && current.note.trim() === '') {
+          delete logs[dateStr];
+        } else {
+          logs[dateStr] = current;
+        }
+        saveAllLogs(logs);
+      }
+
+      function flashSavedIndicator() {
+        const el = document.getElementById('save-indicator');
+        if (!el) return;
+        el.classList.remove('opacity-0');
+        clearTimeout(el._timer);
+        el._timer = setTimeout(() => {
+          el.classList.add('opacity-0');
+        }, 1400);
+      }
+
+      function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.classList.remove('opacity-0');
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(() => {
+          toast.classList.add('opacity-0');
+        }, 2200);
+      }
+
+      function computeDayStats(rec) {
+        let totalBaseDone = 0;
+        let totalBaseTarget = 0;
+        let totalAllDone = 0;
+        const repsByEx = {};
+        const setsDoneByEx = {};
+
+        EXERCISES.forEach(ex => {
+          const exData = rec.exercises[ex.id];
+          let reps = 0;
+          let setsDone = 0;
+          let baseDone = 0;
+          exData.sets.forEach((s, idx) => {
+            if (s.done) {
+              reps += Number(s.reps) || 0;
+              setsDone += 1;
+              if (idx < ex.minSets) baseDone += 1;
+            }
+          });
+          repsByEx[ex.id] = reps;
+          setsDoneByEx[ex.id] = setsDone;
+          totalBaseDone += baseDone;
+          totalBaseTarget += ex.minSets;
+          totalAllDone += setsDone;
+        });
+
+        const pct = totalBaseTarget > 0 ? Math.min(100, Math.round((totalBaseDone / totalBaseTarget) * 100)) : 0;
+        const isComplete = totalBaseDone >= totalBaseTarget;
+        return {
+          totalBaseDone,
+          totalBaseTarget,
+          totalAllDone,
+          pct,
+          isComplete,
+          repsByEx,
+          setsDoneByEx
+        };
+      }
+
+      function renderToday() {
+        const datePicker = document.getElementById('date-picker');
+        datePicker.value = selectedDate;
+
+        const rec = getDayRecord(selectedDate);
+        const stats = computeDayStats(rec);
+
+        document.getElementById('summary-sets-done').textContent = stats.totalBaseDone;
+        document.getElementById('summary-sets-target').textContent = stats.totalBaseTarget;
+        document.getElementById('summary-progress-pct').textContent = `${stats.pct}%`;
+        document.getElementById('summary-progress-bar').style.width = `${stats.pct}%`;
+
+        const badge = document.getElementById('daily-status-badge');
+        if (stats.isComplete) {
+          badge.textContent = '今日已達標';
+          badge.className = 'px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700';
+        } else if (stats.totalAllDone > 0) {
+          badge.textContent = '進行中';
+          badge.className = 'px-3 py-1.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700';
+        } else {
+          badge.textContent = '尚未開始';
+          badge.className = 'px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600';
+        }
+
+        document.getElementById('stat-pushup-reps').textContent = stats.repsByEx.pushups;
+        document.getElementById('stat-squat-reps').textContent = stats.repsByEx.squats;
+        document.getElementById('stat-deadbug-reps').textContent = stats.repsByEx.deadbug;
+
+        // Render Exercise Cards
+        const container = document.getElementById('exercise-cards');
+        container.innerHTML = EXERCISES.map(ex => {
+          const exData = rec.exercises[ex.id];
+          const doneSets = stats.setsDoneByEx[ex.id];
+          const totalReps = stats.repsByEx[ex.id];
+          const exReachedMin = doneSets >= ex.minSets;
+          const isTipOpen = openTips[ex.id];
+
+          const variantHtml = ex.hasVariant ? `
+            <div class="flex items-center bg-slate-100 p-0.5 rounded-xl text-xs font-semibold">
+              ${ex.variants.map(v => `
+                <button type="button" data-action="set-variant" data-ex="${ex.id}" data-variant="${v.id}"
+                  class="px-2.5 py-1 rounded-lg transition-all ${exData.variant === v.id ? 'bg-white text-teal-700 shadow-xs' : 'text-slate-500 hover:text-slate-800'}">
+                  ${v.label}
+                </button>
+              `).join('')}
+            </div>
+          ` : '';
+
+          const setsHtml = exData.sets.map((s, idx) => {
+            const setNum = idx + 1;
+            const isOpt = s.optional;
+            return `
+              <div class="rounded-xl border p-2.5 flex flex-col gap-2 transition-all ${s.done ? 'border-teal-300 bg-teal-50/40' : 'border-slate-200 bg-white'}">
+                <div class="flex items-center justify-between gap-1">
+                  <span class="text-xs font-semibold ${s.done ? 'text-teal-800' : 'text-slate-500'}">
+                    第 ${setNum} 組${isOpt ? ' (選做)' : ''}
+                  </span>
+                  <button type="button" data-action="toggle-set" data-ex="${ex.id}" data-idx="${idx}"
+                    class="set-btn w-7 h-7 rounded-lg border flex items-center justify-center ${s.done ? ex.btnDoneClass : 'border-slate-300 bg-white text-slate-400 hover:border-teal-400'}"
+                    aria-label="切換第 ${setNum} 組完成狀態">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                  </button>
+                </div>
+                <div class="flex items-center justify-between bg-slate-50 rounded-lg px-1.5 py-1 border border-slate-200/70">
+                  <button type="button" data-action="adj-reps" data-ex="${ex.id}" data-idx="${idx}" data-delta="-1"
+                    class="w-6 h-6 rounded-md hover:bg-slate-200/70 text-slate-600 font-bold text-sm flex items-center justify-center">-</button>
+                  <div class="text-xs font-bold text-slate-800 tabular-nums">
+                    ${s.reps} <span class="font-normal text-slate-500">${ex.unit}</span>
+                  </div>
+                  <button type="button" data-action="adj-reps" data-ex="${ex.id}" data-idx="${idx}" data-delta="1"
+                    class="w-6 h-6 rounded-md hover:bg-slate-200/70 text-slate-600 font-bold text-sm flex items-center justify-center">+</button>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          return `
+            <article class="bg-white rounded-2xl border ${exReachedMin ? 'border-teal-300/90' : 'border-slate-200/80'} p-4 sm:p-5 shadow-sm transition-colors">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div class="space-y-1">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${ex.accentBg} ${ex.accentText}">
+                      ${exReachedMin ? '已達標' : `目標 ${ex.minSets} 組起`}
+                    </span>
+                    <h3 class="text-base sm:text-lg font-bold text-slate-900">${ex.name}</h3>
+                  </div>
+                  <p class="text-xs sm:text-sm text-slate-500">${ex.targetSummary}</p>
+                </div>
+                <div class="flex items-center gap-2.5">
+                  ${variantHtml}
+                  <div class="text-right pl-2">
+                    <div class="text-xs text-slate-400">累計</div>
+                    <div class="text-base font-bold text-slate-900 tabular-nums">${totalReps} <span class="text-xs font-normal text-slate-500">${ex.unit}</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sets Grid -->
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-4">
+                ${setsHtml}
+              </div>
+
+              <!-- Expandable Safety Tip -->
+              <div class="mt-3.5 pt-3 border-t border-slate-100">
+                <button type="button" data-action="toggle-tip" data-ex="${ex.id}"
+                  class="w-full flex items-center justify-between text-xs font-semibold text-slate-600 hover:text-teal-700 transition-colors">
+                  <span class="flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-teal-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                    </svg>
+                    ${ex.tipTitle}
+                  </span>
+                  <svg class="w-4 h-4 transition-transform ${isTipOpen ? 'rotate-180' : ''}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                  </svg>
+                </button>
+                <div class="${isTipOpen ? 'block' : 'hidden'} mt-2.5 text-xs sm:text-sm leading-relaxed text-slate-600 bg-slate-50 rounded-xl p-3 border border-slate-200/60">
+                  ${ex.tipBody}
+                </div>
+              </div>
+            </article>
+          `;
+        }).join('');
+
+        // Render Feeling Tags
+        const tagsContainer = document.getElementById('feeling-tags');
+        tagsContainer.innerHTML = FEELING_TAGS.map(tag => {
+          const active = rec.tags.includes(tag);
+          return `
+            <button type="button" data-action="toggle-tag" data-tag="${tag}"
+              class="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${active ? 'bg-teal-600 text-white border-teal-600 shadow-xs' : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-teal-300'}">
+              ${tag}
+            </button>
+          `;
+        }).join('');
+
+        const noteEl = document.getElementById('daily-note');
+        if (noteEl.value !== rec.note) {
+          noteEl.value = rec.note;
+        }
+      }
+
+      // ==================== HISTORY & CHART ====================
+      function renderHistory() {
+        const logs = loadAllLogs();
+        const allDates = Object.keys(logs).sort().reverse();
+        const activeDates = allDates.filter(d => {
+          const st = computeDayStats(logs[d]);
+          return st.totalAllDone > 0;
+        });
+
+        // Streak calculation from today or yesterday
+        const today = getTodayStr();
+        let streak = 0;
+        let cursor = activeDates.includes(today) ? today : addDays(today, -1);
+        while (activeDates.includes(cursor)) {
+          streak += 1;
+          cursor = addDays(cursor, -1);
+        }
+
+        // Last 7 days stats
+        let weekReps = 0;
+        let weekCompleteDays = 0;
+        for (let i = 0; i < 7; i++) {
+          const d = addDays(today, -i);
+          if (logs[d]) {
+            const st = computeDayStats(logs[d]);
+            weekReps += st.repsByEx.pushups + st.repsByEx.squats + st.repsByEx.deadbug;
+            if (st.isComplete) weekCompleteDays += 1;
+          }
+        }
+
+        document.getElementById('kpi-streak').textContent = streak;
+        document.getElementById('kpi-total-days').textContent = activeDates.length;
+        document.getElementById('kpi-week-reps').textContent = weekReps;
+        document.getElementById('kpi-week-rate').textContent = Math.round((weekCompleteDays / 7) * 100);
+
+        renderChart(logs);
+        renderHistoryList(logs, allDates);
+      }
+
+      function renderChart(logs) {
+        const ctx = document.getElementById('history-chart');
+        if (!ctx) return;
+
+        const today = getTodayStr();
+        const labels = [];
+        const pushupData = [];
+        const squatData = [];
+        const deadbugData = [];
+
+        for (let i = chartRange - 1; i >= 0; i--) {
+          const d = addDays(today, -i);
+          labels.push(d.slice(5)); // MM-DD
+          if (logs[d]) {
+            const st = computeDayStats(logs[d]);
+            pushupData.push(st.repsByEx.pushups);
+            squatData.push(st.repsByEx.squats);
+            deadbugData.push(st.repsByEx.deadbug);
+          } else {
+            pushupData.push(0);
+            squatData.push(0);
+            deadbugData.push(0);
+          }
+        }
+
+        if (chartInstance) {
+          chartInstance.destroy();
+        }
+
+        chartInstance = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [
+              {
+                label: '伏地挺身 (下)',
+                data: pushupData,
+                backgroundColor: '#0d9488',
+                borderRadius: 4
+              },
+              {
+                label: '深蹲 (下)',
+                data: squatData,
+                backgroundColor: '#0284c7',
+                borderRadius: 4
+              },
+              {
+                label: '死蟲式 (次)',
+                data: deadbugData,
+                backgroundColor: '#d97706',
+                borderRadius: 4
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                stacked: true,
+                grid: { display: false }
+              },
+              y: {
+                stacked: true,
+                beginAtZero: true,
+                ticks: { precision: 0 }
+              }
+            },
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: { boxWidth: 12, usePointStyle: true, pointStyle: 'circle' }
+              }
+            }
+          }
+        });
+      }
+
+      function renderHistoryList(logs, sortedDates) {
+        const listEl = document.getElementById('history-list');
+        if (sortedDates.length === 0) {
+          listEl.innerHTML = `
+            <div class="py-10 text-center text-sm text-slate-400">
+              目前還沒有任何訓練紀錄。<br />回到「今日訓練」點選組數即可開始記錄！
+            </div>
+          `;
+          return;
+        }
+
+        listEl.innerHTML = sortedDates.map(dateStr => {
+          const rec = getDayRecord(dateStr);
+          const st = computeDayStats(rec);
+          const variantLabel = rec.exercises.pushups.variant === 'kneeling' ? ' (跪姿)' : '';
+          const tagsHtml = rec.tags.map(t => `<span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[11px]">${t}</span>`).join('');
+          return `
+            <div class="py-3.5 flex flex-wrap items-center justify-between gap-3">
+              <div class="space-y-1 min-w-0">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-bold text-slate-800 tabular-nums">${dateStr}</span>
+                  <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold ${st.isComplete ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}">
+                    ${st.isComplete ? '已達標' : `${st.totalAllDone} 組`}
+                  </span>
+                </div>
+                <div class="text-xs text-slate-600 flex flex-wrap gap-x-3 gap-y-1">
+                  <span>伏地挺身${variantLabel}: <strong class="text-slate-800">${st.repsByEx.pushups}</strong> 下</span>
+                  <span>深蹲: <strong class="text-slate-800">${st.repsByEx.squats}</strong> 下</span>
+                  <span>死蟲式: <strong class="text-slate-800">${st.repsByEx.deadbug}</strong> 次</span>
+                </div>
+                ${tagsHtml || rec.note ? `
+                  <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                    ${tagsHtml}
+                    ${rec.note ? `<span class="text-xs text-slate-500 truncate max-w-md">「${escapeHtml(rec.note)}」</span>` : ''}
+                  </div>
+                ` : ''}
+              </div>
+              <button type="button" data-action="jump-date" data-date="${dateStr}"
+                class="px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-teal-700 shrink-0 transition-colors">
+                檢視 / 編輯
+              </button>
+            </div>
+          `;
+        }).join('');
+      }
+
+      function escapeHtml(str) {
+        return str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+      }
+
+      // ==================== TIMER LOGIC ====================
+      function formatTime(sec) {
+        const m = String(Math.floor(sec / 60)).padStart(2, '0');
+        const s = String(sec % 60).padStart(2, '0');
+        return `${m}:${s}`;
+      }
+
+      function playChime() {
+        if (!soundEnabled) return;
+        try {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (!AudioCtx) return;
+          const ctx = new AudioCtx();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+          osc.frequency.setValueAtTime(880, ctx.currentTime + 0.15); // A5
+          gain.gain.setValueAtTime(0.15, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.55);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.55);
+        } catch (e) {
+          // Ignore audio errors
+        }
+      }
+
+      function updateTimerUI() {
+        document.getElementById('timer-display').textContent = formatTime(timerRemaining);
+        const toggleBtn = document.getElementById('btn-timer-toggle');
+        toggleBtn.textContent = timerRunning ? '暫停' : (timerRemaining < timerDuration && timerRemaining > 0 ? '繼續' : '開始休息');
+      }
+
+      function stopTimer() {
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+        timerRunning = false;
+        updateTimerUI();
+      }
+
+      function startTimer() {
+        stopTimer();
+        if (timerRemaining <= 0) timerRemaining = timerDuration;
+        timerRunning = true;
+        updateTimerUI();
+        timerInterval = setInterval(() => {
+          timerRemaining -= 1;
+          if (timerRemaining <= 0) {
+            timerRemaining = 0;
+            stopTimer();
+            playChime();
+            showToast('休息時間結束，準備下一組，記得保持順暢呼吸！');
+          } else {
+            updateTimerUI();
+          }
+        }, 1000);
+      }
+
+      // ==================== MODAL ====================
+      function openModal(title, desc, onConfirm) {
+        document.getElementById('modal-title').textContent = title;
+        document.getElementById('modal-desc').textContent = desc;
+        modalConfirmCallback = onConfirm;
+        const modal = document.getElementById('confirm-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+
+      function closeModal() {
+        const modal = document.getElementById('confirm-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        modalConfirmCallback = null;
+      }
+
+      // ==================== EVENT LISTENERS ====================
+      function switchView(view) {
+        currentView = view;
+        const todaySec = document.getElementById('view-today');
+        const historySec = document.getElementById('view-history');
+        const tabToday = document.getElementById('tab-today');
+        const tabHistory = document.getElementById('tab-history');
+
+        if (view === 'today') {
+          todaySec.classList.remove('hidden');
+          historySec.classList.add('hidden');
+          tabToday.className = 'px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all bg-white text-teal-700 shadow-sm';
+          tabHistory.className = 'px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all text-slate-600 hover:text-slate-900';
+          renderToday();
+        } else {
+          todaySec.classList.add('hidden');
+          historySec.classList.remove('hidden');
+          tabHistory.className = 'px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all bg-white text-teal-700 shadow-sm';
+          tabToday.className = 'px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all text-slate-600 hover:text-slate-900';
+          renderHistory();
+        }
+      }
+
+      document.getElementById('tab-today').addEventListener('click', () => switchView('today'));
+      document.getElementById('tab-history').addEventListener('click', () => switchView('history'));
+
+      document.getElementById('date-picker').addEventListener('change', e => {
+        if (e.target.value) {
+          selectedDate = e.target.value;
+          renderToday();
+        }
+      });
+
+      document.getElementById('btn-prev-day').addEventListener('click', () => {
+        selectedDate = addDays(selectedDate, -1);
+        renderToday();
+      });
+
+      document.getElementById('btn-next-day').addEventListener('click', () => {
+        selectedDate = addDays(selectedDate, 1);
+        renderToday();
+      });
+
+      document.getElementById('btn-go-today').addEventListener('click', () => {
+        selectedDate = getTodayStr();
+        renderToday();
+      });
+
+      // Delegated events on exercise cards
+      document.getElementById('exercise-cards').addEventListener('click', e => {
+        const btn = e.target.closest('button[data-action]');
+        if (!btn) return;
+        const action = btn.dataset.action;
+        const exId = btn.dataset.ex;
+
+        if (action === 'toggle-set') {
+          const idx = Number(btn.dataset.idx);
+          let becameDone = false;
+          updateDayRecord(selectedDate, rec => {
+            const target = rec.exercises[exId].sets[idx];
+            target.done = !target.done;
+            becameDone = target.done;
+          });
+          renderToday();
+          if (becameDone) {
+            // Auto-start rest timer gently if not already running
+            if (!timerRunning) {
+              timerRemaining = timerDuration;
+              startTimer();
+            }
+          }
+        } else if (action === 'adj-reps') {
+          const idx = Number(btn.dataset.idx);
+          const delta = Number(btn.dataset.delta);
+          updateDayRecord(selectedDate, rec => {
+            const target = rec.exercises[exId].sets[idx];
+            target.reps = Math.max(0, Math.min(99, Number(target.reps) + delta));
+          });
+          renderToday();
+        } else if (action === 'set-variant') {
+          const variant = btn.dataset.variant;
+          updateDayRecord(selectedDate, rec => {
+            rec.exercises[exId].variant = variant;
+          });
+          renderToday();
+        } else if (action === 'toggle-tip') {
+          openTips[exId] = !openTips[exId];
+          renderToday();
+        }
+      });
+
+      // Feeling tags
+      document.getElementById('feeling-tags').addEventListener('click', e => {
+        const btn = e.target.closest('button[data-action="toggle-tag"]');
+        if (!btn) return;
+        const tag = btn.dataset.tag;
+        updateDayRecord(selectedDate, rec => {
+          const i = rec.tags.indexOf(tag);
+          if (i >= 0) rec.tags.splice(i, 1);
+          else rec.tags.push(tag);
+        });
+        renderToday();
+      });
+
+      // Daily note
+      document.getElementById('daily-note').addEventListener('input', e => {
+        const val = e.target.value;
+        updateDayRecord(selectedDate, rec => {
+          rec.note = val;
+        });
+      });
+
+      // Clear day
+      document.getElementById('btn-clear-day').addEventListener('click', () => {
+        openModal('清除本日紀錄', `確定要清除 ${selectedDate} 的所有運動組數與備註嗎？`, () => {
+          const logs = loadAllLogs();
+          delete logs[selectedDate];
+          saveAllLogs(logs);
+          renderToday();
+          showToast('已清除本日紀錄');
+        });
+      });
+
+      // Timer controls
+      document.querySelectorAll('.timer-preset').forEach(btn => {
+        btn.addEventListener('click', () => {
+          timerDuration = Number(btn.dataset.timerSec);
+          timerRemaining = timerDuration;
+          stopTimer();
+          document.querySelectorAll('.timer-preset').forEach(b => {
+            b.className = 'timer-preset px-2.5 py-1.5 rounded-lg hover:bg-white/15 transition-colors';
+          });
+          btn.className = 'timer-preset px-2.5 py-1.5 rounded-lg bg-white text-teal-800 transition-colors';
+          updateTimerUI();
+        });
+      });
+
+      document.getElementById('btn-timer-toggle').addEventListener('click', () => {
+        if (timerRunning) stopTimer();
+        else startTimer();
+      });
+
+      document.getElementById('btn-timer-reset').addEventListener('click', () => {
+        timerRemaining = timerDuration;
+        stopTimer();
+      });
+
+      document.getElementById('btn-sound-toggle').addEventListener('click', () => {
+        soundEnabled = !soundEnabled;
+        document.getElementById('icon-sound-on').classList.toggle('hidden', !soundEnabled);
+        document.getElementById('icon-sound-off').classList.toggle('hidden', soundEnabled);
+        showToast(soundEnabled ? '已開啟休息提示音' : '已靜音休息提示');
+      });
+
+      // Chart range buttons
+      document.querySelectorAll('.chart-range-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          chartRange = Number(btn.dataset.range);
+          document.querySelectorAll('.chart-range-btn').forEach(b => {
+            b.className = 'chart-range-btn px-3 py-1 rounded-lg text-slate-600 hover:text-slate-900';
+          });
+          btn.className = 'chart-range-btn px-3 py-1 rounded-lg bg-white text-teal-700 shadow-sm';
+          renderChart(loadAllLogs());
+        });
+      });
+
+      // Jump to date from history list
+      document.getElementById('history-list').addEventListener('click', e => {
+        const btn = e.target.closest('button[data-action="jump-date"]');
+        if (!btn) return;
+        selectedDate = btn.dataset.date;
+        switchView('today');
+      });
+
+      // Export & Import JSON
+      document.getElementById('btn-export').addEventListener('click', () => {
+        const logs = loadAllLogs();
+        const blob = new Blob([JSON.stringify(logs, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `workout-backup-${getTodayStr()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('已匯出 JSON 備份檔');
+      });
+
+      document.getElementById('input-import').addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+          try {
+            const parsed = JSON.parse(ev.target.result);
+            if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+              showToast('備份檔格式不正確');
+              return;
+            }
+            const existing = loadAllLogs();
+            const merged = Object.assign({}, existing, parsed);
+            saveAllLogs(merged);
+            renderHistory();
+            showToast('已成功匯入備份紀錄');
+          } catch (err) {
+            showToast('無法解析 JSON 檔案');
+          }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+      });
+
+      // Modal events
+      document.getElementById('modal-cancel').addEventListener('click', closeModal);
+      document.getElementById('modal-confirm').addEventListener('click', () => {
+        if (modalConfirmCallback) modalConfirmCallback();
+        closeModal();
+      });
+
+      // Initialize
+      updateTimerUI();
+      renderToday();
+    })();
+  </script>
+</body>
+</html>
