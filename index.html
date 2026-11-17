@@ -130,39 +130,6 @@
         </div>
       </div>
 
-      <!-- Rest & Breathing Timer Bar -->
-      <div class="bg-gradient-to-r from-teal-700 to-teal-600 text-white rounded-2xl p-4 shadow-sm flex flex-wrap items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <div>
-            <div class="text-xs text-teal-100 font-medium">組間休息計時器 · 保持順暢呼吸勿憋氣</div>
-            <div id="timer-display" class="text-2xl font-bold tabular-nums tracking-tight">01:00</div>
-          </div>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-2">
-          <div class="flex items-center bg-white/10 rounded-xl p-0.5 text-xs font-semibold">
-            <button type="button" data-timer-sec="45" class="timer-preset px-2.5 py-1.5 rounded-lg hover:bg-white/15 transition-colors">45秒</button>
-            <button type="button" data-timer-sec="60" class="timer-preset px-2.5 py-1.5 rounded-lg bg-white text-teal-800 transition-colors">60秒</button>
-            <button type="button" data-timer-sec="90" class="timer-preset px-2.5 py-1.5 rounded-lg hover:bg-white/15 transition-colors">90秒</button>
-          </div>
-          <button id="btn-timer-toggle" type="button" class="px-3.5 py-2 rounded-xl bg-white text-teal-800 hover:bg-teal-50 text-xs font-bold shadow-sm transition-colors">
-            開始休息
-          </button>
-          <button id="btn-timer-reset" type="button" class="px-2.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-semibold transition-colors">
-            重設
-          </button>
-          <button id="btn-sound-toggle" type="button" class="w-8 h-8 rounded-xl bg-white/15 hover:bg-white/25 flex items-center justify-center transition-colors" title="提示音效開關" aria-label="提示音效開關">
-            <svg id="icon-sound-on" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" /></svg>
-            <svg id="icon-sound-off" class="w-4 h-4 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 9.75L19.5 12m0 0l2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6l4.72-4.72a.75.75 0 011.28.531V19.94a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.506-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.757 3.63 8.25 4.51 8.25H6.75z" /></svg>
-          </button>
-        </div>
-      </div>
-
       <!-- Exercise Cards Container -->
       <div id="exercise-cards" class="space-y-4"></div>
 
@@ -281,10 +248,10 @@
           id: 'pushups',
           name: '伏地挺身',
           unit: '下',
-          defaultReps: 10,
+          defaultReps: 15,
           minSets: 3,
           maxSets: 4,
-          targetSummary: '10 下 × 3～4 組（總計 30–40 下）',
+          targetSummary: '15 下 × 3～4 組（總計 45–60 下）',
           accentBg: 'bg-teal-50',
           accentText: 'text-teal-700',
           accentBorder: 'border-teal-200',
@@ -301,10 +268,10 @@
           id: 'squats',
           name: '深蹲',
           unit: '下',
-          defaultReps: 12,
+          defaultReps: 20,
           minSets: 3,
           maxSets: 4,
-          targetSummary: '12 下 × 3～4 組（總計 36–48 下）',
+          targetSummary: '20 下 × 3～4 組（總計 60–80 下）',
           accentBg: 'bg-sky-50',
           accentText: 'text-sky-700',
           accentBorder: 'border-sky-200',
@@ -347,13 +314,6 @@
       let chartRange = 7;
       let chartInstance = null;
       let openTips = { pushups: false, squats: false, deadbug: false };
-
-      // Timer state
-      let timerDuration = 60;
-      let timerRemaining = 60;
-      let timerInterval = null;
-      let timerRunning = false;
-      let soundEnabled = true;
 
       // Modal callback
       let modalConfirmCallback = null;
@@ -842,68 +802,6 @@
         return str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
       }
 
-      // ==================== TIMER LOGIC ====================
-      function formatTime(sec) {
-        const m = String(Math.floor(sec / 60)).padStart(2, '0');
-        const s = String(sec % 60).padStart(2, '0');
-        return `${m}:${s}`;
-      }
-
-      function playChime() {
-        if (!soundEnabled) return;
-        try {
-          const AudioCtx = window.AudioContext || window.webkitAudioContext;
-          if (!AudioCtx) return;
-          const ctx = new AudioCtx();
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
-          osc.frequency.setValueAtTime(880, ctx.currentTime + 0.15); // A5
-          gain.gain.setValueAtTime(0.15, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.55);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.start();
-          osc.stop(ctx.currentTime + 0.55);
-        } catch (e) {
-          // Ignore audio errors
-        }
-      }
-
-      function updateTimerUI() {
-        document.getElementById('timer-display').textContent = formatTime(timerRemaining);
-        const toggleBtn = document.getElementById('btn-timer-toggle');
-        toggleBtn.textContent = timerRunning ? '暫停' : (timerRemaining < timerDuration && timerRemaining > 0 ? '繼續' : '開始休息');
-      }
-
-      function stopTimer() {
-        if (timerInterval) {
-          clearInterval(timerInterval);
-          timerInterval = null;
-        }
-        timerRunning = false;
-        updateTimerUI();
-      }
-
-      function startTimer() {
-        stopTimer();
-        if (timerRemaining <= 0) timerRemaining = timerDuration;
-        timerRunning = true;
-        updateTimerUI();
-        timerInterval = setInterval(() => {
-          timerRemaining -= 1;
-          if (timerRemaining <= 0) {
-            timerRemaining = 0;
-            stopTimer();
-            playChime();
-            showToast('休息時間結束，準備下一組，記得保持順暢呼吸！');
-          } else {
-            updateTimerUI();
-          }
-        }, 1000);
-      }
-
       // ==================== MODAL ====================
       function openModal(title, desc, onConfirm) {
         document.getElementById('modal-title').textContent = title;
@@ -978,20 +876,11 @@
 
         if (action === 'toggle-set') {
           const idx = Number(btn.dataset.idx);
-          let becameDone = false;
           updateDayRecord(selectedDate, rec => {
             const target = rec.exercises[exId].sets[idx];
             target.done = !target.done;
-            becameDone = target.done;
           });
           renderToday();
-          if (becameDone) {
-            // Auto-start rest timer gently if not already running
-            if (!timerRunning) {
-              timerRemaining = timerDuration;
-              startTimer();
-            }
-          }
         } else if (action === 'adj-reps') {
           const idx = Number(btn.dataset.idx);
           const delta = Number(btn.dataset.delta);
@@ -1042,37 +931,6 @@
           renderToday();
           showToast('已清除本日紀錄');
         });
-      });
-
-      // Timer controls
-      document.querySelectorAll('.timer-preset').forEach(btn => {
-        btn.addEventListener('click', () => {
-          timerDuration = Number(btn.dataset.timerSec);
-          timerRemaining = timerDuration;
-          stopTimer();
-          document.querySelectorAll('.timer-preset').forEach(b => {
-            b.className = 'timer-preset px-2.5 py-1.5 rounded-lg hover:bg-white/15 transition-colors';
-          });
-          btn.className = 'timer-preset px-2.5 py-1.5 rounded-lg bg-white text-teal-800 transition-colors';
-          updateTimerUI();
-        });
-      });
-
-      document.getElementById('btn-timer-toggle').addEventListener('click', () => {
-        if (timerRunning) stopTimer();
-        else startTimer();
-      });
-
-      document.getElementById('btn-timer-reset').addEventListener('click', () => {
-        timerRemaining = timerDuration;
-        stopTimer();
-      });
-
-      document.getElementById('btn-sound-toggle').addEventListener('click', () => {
-        soundEnabled = !soundEnabled;
-        document.getElementById('icon-sound-on').classList.toggle('hidden', !soundEnabled);
-        document.getElementById('icon-sound-off').classList.toggle('hidden', soundEnabled);
-        showToast(soundEnabled ? '已開啟休息提示音' : '已靜音休息提示');
       });
 
       // Chart range buttons
@@ -1142,7 +1000,6 @@
       });
 
       // Initialize
-      updateTimerUI();
       renderToday();
     })();
   </script>
